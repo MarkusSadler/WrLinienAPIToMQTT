@@ -61,6 +61,7 @@ while(TRUE):
 
             client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
             client.publish(MQTT_TOPIC_BASE + "/TrafficInfo/" + relatedLine, title + " - " + description)
+            client.disconnect()
         
     time.sleep(PUBLISH_INTERVAL)
 
