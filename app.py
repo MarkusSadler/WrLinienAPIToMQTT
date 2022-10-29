@@ -1,14 +1,8 @@
-from multiprocessing.connection import wait
 from pickle import TRUE
-from tracemalloc import stop
-from xml.etree.ElementTree import tostring
+from tkinter import E
 import requests
-import sys
-import os
 import json
 import paho.mqtt.client as mqtt
-from paho.mqtt.properties import Properties
-from paho.mqtt.packettypes import PacketTypes 
 import time
 
 APIKeyDEV = "oQ6yzKZQUiqFbEUk"
@@ -37,9 +31,14 @@ client.username_pw_set(MQTT_USER, MQTT_PW)
 
 
 while(TRUE):
-    stopinfo = requests.get(monitorBaseURL + "?" + "rbl=4629&rbl=4640&&sender=" + APIKeyDEV).json()
-    trafficInfos = requests.get(malfunctionURL).json()
-    
+    try:
+        stopinfo = requests.get(monitorBaseURL + "?" + "rbl=4629&rbl=4640&&sender=" + APIKeyDEV).json()
+        trafficInfos = requests.get(malfunctionURL).json()
+    except Exception as err:
+        print("ERROR: WrLinienAPICALL went wrong. Exception:", err)
+        continue 
+        
+        
     #Publish Monitors
     for monitor in stopinfo['data']['monitors']:
         locationName = monitor['locationStop']['properties']['title']
@@ -48,9 +47,14 @@ while(TRUE):
             towards = line["towards"]
             lineCountdown = line['departures']['departure'][00]['departureTime']['countdown']
 
-            client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
-            client.publish(MQTT_TOPIC_BASE + "/" +locationName+ "/" + lineName + "/" + towards  ,lineCountdown)
-            client.disconnect()
+            try:
+                client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
+                client.publish(MQTT_TOPIC_BASE + "/" +locationName+ "/" + lineName + "/" + towards  ,lineCountdown)
+            except Exception as err:
+                print("ERROR: MQTT Call for Monitor went wrong. Exception:", err)
+                continue 
+            finally:
+                client.disconnect()
 
     #Publish TrafficInfo
     for trafficInfo in trafficInfos['data']['trafficInfos']:
@@ -58,10 +62,13 @@ while(TRUE):
         description = trafficInfo["description"]
 
         for relatedLine in trafficInfo["relatedLines"]:
-
-            client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
-            client.publish(MQTT_TOPIC_BASE + "/TrafficInfo/" + relatedLine, title + " - " + description)
-            client.disconnect()
+            try:
+                client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
+                client.publish(MQTT_TOPIC_BASE + "/TrafficInfo/" + relatedLine, title + " - " + description)
+            except Exception as err:
+                print("ERROR: MQTT Call for TrafficInfo went wrong. Exception:", err)
+            finally:
+                client.disconnect()
         
     time.sleep(PUBLISH_INTERVAL)
 
