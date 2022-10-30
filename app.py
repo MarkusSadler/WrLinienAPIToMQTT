@@ -32,7 +32,7 @@ client.username_pw_set(MQTT_USER, MQTT_PW)
 
 while(TRUE):
     try:
-        stopinfo = requests.get(monitorBaseURL + "?" + "rbl=4629&rbl=4640&&sender=" + APIKeyDEV).json()
+        stopinfo = requests.get(monitorBaseURL + "?" + "rbl=4629&rbl=4640&rbl=4614&rbl=4615&sender=" + APIKeyDEV).json()
         trafficInfos = requests.get(malfunctionURL).json()
     except Exception as err:
         print("ERROR: WrLinienAPICALL went wrong. Exception:", err)
@@ -45,7 +45,12 @@ while(TRUE):
         for line in monitor['lines']:
             lineName=stopinfo['data']['monitors'][0]['lines'][0]['name'] 
             towards = line["towards"]
-            lineCountdown = line['departures']['departure'][00]['departureTime']['countdown']
+            
+            if  'countdown' in line:
+                lineCountdown = line['departures']['departure'][00]['departureTime']['countdown']
+            else:
+                lineCountdown = "No Info available"
+                
 
             try:
                 client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
