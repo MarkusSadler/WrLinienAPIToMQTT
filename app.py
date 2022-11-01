@@ -46,10 +46,10 @@ while(TRUE):
             lineName=stopinfo['data']['monitors'][0]['lines'][0]['name'] 
             towards = line["towards"]
             
-            if  'countdown' in line:
+            try:
                 lineCountdown = line['departures']['departure'][00]['departureTime']['countdown']
-            else:
-                lineCountdown = "No Info available"
+            except:
+                lineCountdown = -1
                 
 
             try:
