@@ -31,6 +31,7 @@ client.username_pw_set(MQTT_USER, MQTT_PW)
 
 
 while(TRUE):
+    #get API Data from Wr Linien
     try:
         stopinfo = requests.get(monitorBaseURL + "?" + "rbl=4629&rbl=4640&rbl=4614&rbl=4615&sender=" + APIKeyDEV).json()
         trafficInfos = requests.get(malfunctionURL).json()
@@ -46,12 +47,13 @@ while(TRUE):
             lineName=stopinfo['data']['monitors'][0]['lines'][0]['name'] 
             towards = line["towards"]
             
+            #check if countdown exists
             try:
                 lineCountdown = line['departures']['departure'][00]['departureTime']['countdown']
             except:
                 lineCountdown = -1
                 
-
+            #publish countdown to MQTT
             try:
                 client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
                 client.publish(MQTT_TOPIC_BASE + "/" +locationName+ "/" + lineName + "/" + towards  ,lineCountdown)
@@ -61,18 +63,21 @@ while(TRUE):
             finally:
                 client.disconnect()
 
+
+    #Publish TrafficInfo
     allRelatedLines = []
     currentRelatedLines = []
-    #Publish TrafficInfo
     for trafficInfo in trafficInfos['data']['trafficInfos']:
         title = trafficInfo["title"]
         description = trafficInfo["description"]
 
+        #collect all relatedLines for comparison later
         for relatedLine in trafficInfo["relatedLines"]:
             if not relatedLine in allRelatedLines:
                 allRelatedLines.append(relatedLine)
             currentRelatedLines.append(relatedLine)
 
+            #Publish Traffic info on MQTT
             try:
                 client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
                 client.publish(MQTT_TOPIC_BASE + "/TrafficInfo/" + relatedLine, title + " - " + description)
@@ -81,6 +86,7 @@ while(TRUE):
             finally:
                 client.disconnect()
 
+    #check if a related Line disapeared and clear it in MQTT
     for relatedLine in allRelatedLines:
         if not relatedLine in currentRelatedLines:
             try:
