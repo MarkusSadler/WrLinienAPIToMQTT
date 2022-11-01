@@ -41,6 +41,15 @@ while(TRUE):
         
         
     #Publish Monitors
+    try:
+        client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
+        client.publish(MQTT_TOPIC_BASE ,json.dumps(stopinfo))
+    except Exception as err:
+        print("ERROR: MQTT Call for Monitor went wrong. Exception:", err)
+        continue 
+    finally:
+        client.disconnect()
+
     for monitor in stopinfo['data']['monitors']:
         locationName = monitor['locationStop']['properties']['title']
         for line in monitor['lines']:
@@ -65,6 +74,14 @@ while(TRUE):
 
 
     #Publish TrafficInfo
+    try:
+        client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
+        client.publish(MQTT_TOPIC_BASE + "/TrafficInfo", json.dumps(trafficInfos))
+    except Exception as err:
+        print("ERROR: MQTT Call for TrafficInfo went wrong. Exception:", err)
+    finally:
+        client.disconnect()
+
     allRelatedLines = []
     currentRelatedLines = []
     for trafficInfo in trafficInfos['data']['trafficInfos']:
