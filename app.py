@@ -61,12 +61,18 @@ while(TRUE):
             finally:
                 client.disconnect()
 
+    allRelatedLines = []
+    currentRelatedLines = []
     #Publish TrafficInfo
     for trafficInfo in trafficInfos['data']['trafficInfos']:
         title = trafficInfo["title"]
         description = trafficInfo["description"]
 
         for relatedLine in trafficInfo["relatedLines"]:
+            if not relatedLine in allRelatedLines:
+                allRelatedLines.append(relatedLine)
+            currentRelatedLines.append(relatedLine)
+
             try:
                 client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
                 client.publish(MQTT_TOPIC_BASE + "/TrafficInfo/" + relatedLine, title + " - " + description)
@@ -74,7 +80,17 @@ while(TRUE):
                 print("ERROR: MQTT Call for TrafficInfo went wrong. Exception:", err)
             finally:
                 client.disconnect()
-        
+
+    for relatedLine in allRelatedLines:
+        if not relatedLine in currentRelatedLines:
+            try:
+                client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
+                client.publish(MQTT_TOPIC_BASE + "/TrafficInfo/" + relatedLine, '')
+            except Exception as err:
+                print("ERROR: MQTT Call for TrafficInfo deletion went wrong. Exception:", err)
+            finally:
+                client.disconnect()
+
     time.sleep(PUBLISH_INTERVAL)
 
 
