@@ -37,6 +37,7 @@ while(TRUE):
         trafficInfos = requests.get(malfunctionURL).json()
     except Exception as err:
         print("ERROR: WrLinienAPICALL went wrong. Exception:", err)
+        time.sleep(PUBLISH_INTERVAL)
         continue 
         
         
