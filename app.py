@@ -67,6 +67,7 @@ try:
                 try:
                     client.connect(MQTT_HOST,MQTT_PORT,MQTT_KEEPALIVE_INTERVAL)
                     client.publish(MQTT_TOPIC_BASE + "/" +locationName+ "/" + lineName + "/" + towards  ,lineCountdown)
+                    print("INFO: Monitor Published for " + "/" +locationName+ "/" + lineName + "/" + towards)
                 except Exception as err:
                     print("ERROR: MQTT Call for Monitor went wrong. Exception:", err)
                     continue 
