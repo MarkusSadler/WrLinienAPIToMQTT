@@ -4,18 +4,18 @@ import requests
 import json
 import paho.mqtt.client as mqtt
 import time
+import os
 
-APIKeyDEV = "oQ6yzKZQUiqFbEUk"
-APIKeyPROD = "HB7skR885Pgz73gi"
+APIKeyDEV = os.environ['WRLINIEN_API_KEY']
 monitorBaseURL = "http://www.wienerlinien.at/ogd_realtime/monitor"
 malfunctionURL = "http://www.wienerlinien.at/ogd_realtime/trafficInfoList?name=stoerunglang&sender=" + APIKeyDEV
 
-MQTT_HOST = "192.168.0.102"
+MQTT_HOST = os.environ['MQTT_HOST']
 MQTT_PORT = 1883
 MQTT_KEEPALIVE_INTERVAL = 45
 MQTT_TOPIC_BASE = "WrLinien"
-MQTT_USER = "admin"
-MQTT_PW = "v6TKTgNxPg9M"
+MQTT_USER = os.environ['MQTT_USER']
+MQTT_PW = os.environ['MQTT_PW']
 PUBLISH_INTERVAL = 30 #in seconds
 
 try: 
